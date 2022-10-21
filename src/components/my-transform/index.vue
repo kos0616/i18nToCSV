@@ -114,6 +114,8 @@ import download from "./lib/download";
 
 const langs = ["en_US", "TH", "VN", "zh_CN", "zh_TW"];
 
+// 徹底分家 json 和 csv
+// 理由是 csv 除了預覽檔 json格式 還有輸出用的檔案名稱
 /** 轉換模式 */
 export default defineComponent({
   name: "my-transform-mode",
@@ -129,7 +131,9 @@ export default defineComponent({
     /** 檔案匯入 */
     const handleFile = async (ev: Event) => {
       const result = await fileFormater(ev);
+
       if (result) csvResult.value = result;
+      console.log(result);
     };
 
     /** 文字輸入 */

@@ -1,4 +1,5 @@
 import setJson from "./loadingJson";
+import setCsv from "./loadingCsv";
 
 /**
  * Loading .json/.csv then convert to Object
@@ -17,12 +18,7 @@ export default (ev: Event): void | Promise<Record<string, string>> => {
   if (FILE_TYPE.includes("json")) return setJson(data);
 
   /** csv 流程 */
-  if (FILE_TYPE.includes("csv")) {
-    alert("csv");
-    console.log(data);
-    // setCsv(data);
-    return;
-  }
+  if (FILE_TYPE.includes("csv")) return setCsv(data);
 };
 
 /** 檢查檔案存在 */
