@@ -1,7 +1,7 @@
 <template>
   <section>
     <div class="flex gap-4 mb-5">
-      <article>
+      <article class="max-w-sm">
         <p class="text-stone-600 text-center mb-5 text-xl">
           <code class="my-code">*.json</code>
           <i class="mx-2 fa-solid fa-arrow-right-arrow-left fa-fw" />
@@ -30,7 +30,7 @@
               <small>模組包命名，避免翻譯完成後，丟失來源。</small>
             </div>
             <div class="mb-3">
-              <label for="lang" class="block mb-1">LANG CODE</label>
+              <label for="lang" class="block mb-1">Target Lang code</label>
               <input
                 v-model="DOWNLOAD_OPTIONS.LANG"
                 type="text"
@@ -62,7 +62,7 @@
         </form>
       </article>
 
-      <div class="w-full">
+      <div class="grow">
         <label class="rounded-lg bg-gray-200 border p-5 block mb-5">
           <input @change="handleFile" type="file" accept=".csv,.json" />
         </label>
@@ -109,6 +109,7 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import fileFormater from "./lib/index";
+import flatter from "./lib/objectFlatter";
 import download from "./lib/download";
 
 const langs = ["en_US", "TH", "VN", "zh_CN", "zh_TW"];
@@ -147,7 +148,7 @@ export default defineComponent({
           errorMSG.value = "";
           return;
         }
-        csvResult.value = obj;
+        csvResult.value = flatter(obj);
         errorMSG.value = "";
       } catch (e) {
         errorMSG.value = e as string;
@@ -164,7 +165,7 @@ export default defineComponent({
         return;
       }
       const formatedData = keys.map((k) => {
-        return `${k}, "${csvResult.value[k]}"`;
+        return `${k},"${csvResult.value[k]}"`;
       }, []);
       const text = `${FIRST_ROW} ${formatedData.join("\n")}`;
       if (text) {
