@@ -1,11 +1,16 @@
 import _ from "lodash";
 
+export type returns = {
+  fileName: string;
+  result: Record<string, string>;
+};
+
 /**
  * 將格式化後的 csv 檔轉回物件，並且用 Promise 的方式回傳
  * @param file csv 語系檔
  * @returns Promise<object> 必須用 Promise 才能取得 FileReader 的結果
  */
-export default (file: File): Promise<Record<string, string>> => {
+export default (file: File): Promise<returns> => {
   const reader = new FileReader();
 
   return new Promise((resolve, reject) => {
@@ -19,7 +24,7 @@ export default (file: File): Promise<Record<string, string>> => {
         resolve(parser(RAW_DATA));
       } catch (e) {
         alert(e);
-        resolve({});
+        resolve({ fileName: "", result: {} });
       }
     };
     reader.readAsText(file);
@@ -30,14 +35,16 @@ function parser(RAW_DATA: string) {
   const ARR_DATA = RAW_DATA.split("\n") || [];
 
   /** 取表頭做為設定值 */
-  // const TITLE = ARR_DATA[0] || "";
-  /** 取 C:1 做為檔案名稱 */
-  // const FILE_NAME = CSVtoArray(TITLE)[2];
-  // vm.CSV_OPTIONS.FILE_NAME = FILE_NAME;
+  const TITLE = ARR_DATA[0] || "";
+  /** 取 C:1 模組名稱 */
+  const MODULE_NAME = CSVtoArray(TITLE)[0];
+  /** 取 C:3 語系 */
+  const LOCALE_NAME = CSVtoArray(TITLE)[2];
+  const fileName = `${MODULE_NAME}-${LOCALE_NAME}`;
 
   /** 剩餘的語系資料 */
   const TRUE_DATAS = ARR_DATA.slice(1);
-  return TRUE_DATAS.reduce((cur, str) => {
+  const result: Record<string, string> = TRUE_DATAS.reduce((cur, str) => {
     const arr = CSVtoArray(str);
     /** 指定 KEY 值  */
     const key = arr[0];
@@ -53,6 +60,8 @@ function parser(RAW_DATA: string) {
     }
     return { ...cur, ...{ [key]: value } };
   }, {});
+
+  return { fileName, result };
 }
 
 // Return array of string values, or NULL if CSV string not well formed.

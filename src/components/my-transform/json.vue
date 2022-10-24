@@ -4,7 +4,7 @@
       class="md:grid grid-rows-[80px_auto] grid-cols-2 grid-flow-col gap-4 mb-5"
     >
       <button
-        @click="$emit('modechange')"
+        @click="$emit('modeChange')"
         class="text-stone-600 text-center text-xl flex items-center justify-center"
       >
         <code class="my-code"> json </code>
@@ -125,7 +125,7 @@ const langs = ["en_US", "TH", "VN", "zh_CN", "zh_TW"];
 /** 轉換模式 JSON 轉 CSV */
 export default defineComponent({
   name: "my-transform-mode-JSON",
-  emits: ["modechange"],
+  emits: ["modeChange"],
   setup() {
     const csvResult = ref<Record<string, string>>({});
 
@@ -137,9 +137,9 @@ export default defineComponent({
 
     /** 檔案匯入 */
     const handleFile = async (ev: Event) => {
-      const result = await handleJson(ev);
+      const getter = await handleJson(ev);
 
-      if (result) csvResult.value = result;
+      if (getter) csvResult.value = getter;
     };
 
     /** 文字輸入 */

@@ -1,5 +1,5 @@
 import setJson from "./loadingJson";
-import setCsv from "./loadingCsv";
+import setCsv, { returns } from "./loadingCsv";
 
 /**
  * Loading .json then convert to Object
@@ -24,7 +24,7 @@ export function handleJson(ev: Event): void | Promise<Record<string, string>> {
  * @params ev Event
  * @return Object
  */
-export function handleCsv(ev: Event): void | Promise<Record<string, string>> {
+export function handleCsv(ev: Event): void | Promise<returns> {
   if (chkFile(ev) === false) return;
 
   const target = ev.target as HTMLInputElement;

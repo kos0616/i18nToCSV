@@ -1,7 +1,7 @@
 <template>
   <section>
-    <json v-if="mode === 1" @modeCchange="handleSwitchMode"> </json>
-    <csv v-if="mode === 2" @modeCchange="handleSwitchMode"> </csv>
+    <json v-if="mode === 1" @modeChange="handleSwitchMode"> </json>
+    <csv v-if="mode === 2" @modeChange="handleSwitchMode"> </csv>
   </section>
 </template>
 
