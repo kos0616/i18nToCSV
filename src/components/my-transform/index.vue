@@ -1,193 +1,32 @@
 <template>
   <section>
-    <div class="flex gap-4 mb-5">
-      <article class="max-w-sm">
-        <p class="text-stone-600 text-center mb-5 text-xl">
-          <code class="my-code">*.json</code>
-          <i class="mx-2 fa-solid fa-arrow-right-arrow-left fa-fw" />
-          <code class="my-code">*.csv</code>
-        </p>
-
-        <form
-          @submit.prevent="handleDownloadCSV"
-          class="border rounded-lg bg-white"
-        >
-          <h3 class="py-2 px-3 text-lg rounded-t-lg bg-cyan-200 text-gray-700">
-            <i class="text-cyan-800 fas fa-tools fa-fw"></i>
-            SETTINGS
-          </h3>
-          <div class="px-3 py-2">
-            <div class="mb-3">
-              <label for="module" class="block mb-1">Module Name</label>
-              <input
-                v-model="DOWNLOAD_OPTIONS.MODULE_NAME"
-                type="text"
-                class="border rounded px-2 py-1 w-full"
-                id="module"
-                placeholder="FPKG-25-Util, THEME-1"
-                required
-              />
-              <small>模組包命名，避免翻譯完成後，丟失來源。</small>
-            </div>
-            <div class="mb-3">
-              <label for="lang" class="block mb-1">Target Lang code</label>
-              <input
-                v-model="DOWNLOAD_OPTIONS.LANG"
-                type="text"
-                class="border rounded px-2 py-1 w-full"
-                id="lang"
-                list="langs"
-                placeholder="zh_CN"
-              />
-              <datalist id="langs">
-                <option v-for="(lang, i) in langs" :key="`lang_${i}`">
-                  {{ lang }}
-                </option>
-              </datalist>
-              <small class="mt-2 block">
-                翻譯完成後 可轉回
-                <code class="my-code text-xs">{{ "{lang}.json" }}</code></small
-              >
-            </div>
-
-            <button
-              :disabled="Object.keys(csvResult).length === 0"
-              type="submit"
-              class="my-btn w-full mt-3"
-            >
-              <i class="fas fa-fw fa-download"></i>
-              DOWNLOAD CSV
-            </button>
-          </div>
-        </form>
-      </article>
-
-      <div class="grow">
-        <label class="rounded-lg bg-gray-200 border p-5 block mb-5">
-          <input @change="handleFile" type="file" accept=".csv,.json" />
-        </label>
-
-        <p
-          v-show="errorMSG"
-          class="bg-red-300 text-red-900 px-3 py-2 mb-3 rounded"
-          role="alert"
-        >
-          {{ errorMSG }}
-        </p>
-        <textarea
-          @input="handleTextInput"
-          class="p-3 border rounded w-full"
-          cols="30"
-          rows="10"
-          placeholder="{ key: value }"
-        ></textarea>
-      </div>
-    </div>
-
-    <div class="border bg-white rounded-lg">
-      <h3 class="text-lg rounded-t-lg py-2 px-3 bg-blue-200">
-        <i class="fa-solid fa-file-lines fa-fw text-blue-500"></i>
-        RESULT
-      </h3>
-      <hr />
-      <table v-show="Object.keys(csvResult).length > 0" class="w-full">
-        <tbody>
-          <tr
-            v-for="(value, key) in csvResult"
-            :key="`csvResult_${key}`"
-            class="border-b hover:bg-gray-100"
-          >
-            <th class="text-left px-3 whitespace-nowrap w-6">{{ key }}</th>
-            <td>{{ value }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <json v-if="mode === 1" @modeCchange="handleSwitchMode"> </json>
+    <csv v-if="mode === 2" @modeCchange="handleSwitchMode"> </csv>
   </section>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import fileFormater from "./lib/index";
-import flatter from "./lib/objectFlatter";
-import download from "./lib/download";
+import json from "./json.vue";
+import csv from "./csv.vue";
 
-const langs = ["en_US", "TH", "VN", "zh_CN", "zh_TW"];
-
-// 徹底分家 json 和 csv
-// 理由是 csv 除了預覽檔 json格式 還有輸出用的檔案名稱
 /** 轉換模式 */
 export default defineComponent({
+  components: { json, csv },
   name: "my-transform-mode",
   setup() {
-    const csvResult = ref<Record<string, string>>({});
+    /** 1: json to csv, 2: csv to json */
+    const mode = ref<1 | 2>(2);
 
-    /** 文字輸入 */
-    const errorMSG = ref("");
-
-    /** 下載時的命名設定 */
-    const DOWNLOAD_OPTIONS = ref<{ MODULE_NAME?: string; LANG?: string }>({});
-
-    /** 檔案匯入 */
-    const handleFile = async (ev: Event) => {
-      const result = await fileFormater(ev);
-
-      if (result) csvResult.value = result;
-      console.log(result);
-    };
-
-    /** 文字輸入 */
-    const handleTextInput = (ev: InputEvent) => {
-      const dom = ev.target as HTMLTextAreaElement;
-      const str = dom.value;
-
-      if (!str) {
-        errorMSG.value = "";
+    const handleSwitchMode = () => {
+      if (mode.value === 1) {
+        mode.value = 2;
         return;
       }
-
-      try {
-        const obj = JSON.parse(str);
-        if (typeof obj === "number") {
-          errorMSG.value = "";
-          return;
-        }
-        csvResult.value = flatter(obj);
-        errorMSG.value = "";
-      } catch (e) {
-        errorMSG.value = e as string;
-      }
+      mode.value = 1;
     };
 
-    /** CSV 下載 */
-    const handleDownloadCSV = () => {
-      /** 首列設定 */
-      const FIRST_ROW = `${DOWNLOAD_OPTIONS.value.MODULE_NAME}, zh_TW, ${DOWNLOAD_OPTIONS.value.LANG} \n`;
-      const keys = Object.keys(csvResult.value);
-      if (keys.length === 0) {
-        alert("No data");
-        return;
-      }
-      const formatedData = keys.map((k) => {
-        return `${k},"${csvResult.value[k]}"`;
-      }, []);
-      const text = `${FIRST_ROW} ${formatedData.join("\n")}`;
-      if (text) {
-        download(`${DOWNLOAD_OPTIONS.value.MODULE_NAME}.csv`, text);
-      } else {
-        alert("noData");
-      }
-    };
-
-    return {
-      langs,
-      DOWNLOAD_OPTIONS,
-      handleFile,
-      csvResult,
-      handleTextInput,
-      errorMSG,
-      handleDownloadCSV,
-    };
+    return { mode, handleSwitchMode };
   },
 });
 </script>

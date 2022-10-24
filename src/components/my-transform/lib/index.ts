@@ -2,11 +2,11 @@ import setJson from "./loadingJson";
 import setCsv from "./loadingCsv";
 
 /**
- * Loading .json/.csv then convert to Object
+ * Loading .json then convert to Object
  * @params ev Event
  * @return Object
  */
-export default (ev: Event): void | Promise<Record<string, string>> => {
+export function handleJson(ev: Event): void | Promise<Record<string, string>> {
   if (chkFile(ev) === false) return;
 
   const target = ev.target as HTMLInputElement;
@@ -16,11 +16,28 @@ export default (ev: Event): void | Promise<Record<string, string>> => {
 
   /** json 流程 */
   if (FILE_TYPE.includes("json")) return setJson(data);
+  throw new Error("File error!");
+}
 
-  /** csv 流程 */
+/**
+ * Loading .csv then convert to Object
+ * @params ev Event
+ * @return Object
+ */
+export function handleCsv(ev: Event): void | Promise<Record<string, string>> {
+  if (chkFile(ev) === false) return;
+
+  const target = ev.target as HTMLInputElement;
+  const files = target.files || [];
+  const data = files[0];
+  const FILE_TYPE = data.type;
+
+  // csv 流程
   if (FILE_TYPE.includes("csv")) return setCsv(data);
-};
 
+  throw new Error("File error!");
+}
+/** csv 流程 */
 /** 檢查檔案存在 */
 function chkFile(ev: Event): boolean {
   const target = ev.target as HTMLInputElement;
