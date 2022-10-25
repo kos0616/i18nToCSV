@@ -83,7 +83,7 @@ export default defineComponent({
 
     /** JSON 下載 */
     const handleDownloadJSON = () => {
-      const text = JSON.stringify(jsonResult.value);
+      const text = JSON.stringify(jsonResult.value, null, 2);
 
       if (text) {
         download(`${fileName.value}.json`, text);
