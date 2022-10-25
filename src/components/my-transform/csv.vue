@@ -1,32 +1,32 @@
 <template>
   <section>
-    <div class="md:grid grid-rows-[100px] grid-cols-2 gap-4 mb-5">
-      <div class="flex flex-col">
-        <button
-          @click="$emit('modeChange')"
-          class="text-stone-600 text-center text-xl flex items-center justify-center w-full mb-auto"
-        >
-          <code class="my-code">csv</code>
-          <i class="mx-2 fa-solid fa-arrow-right fa-fw" />
-          <code>
-            <i class="fa-solid fa-file-code"></i>
-            json
-          </code>
-        </button>
-        <button
-          @click="handleDownloadJSON"
-          :disabled="Object.keys(csvResult).length === 0"
-          type="submit"
-          class="my-btn w-full mt-3"
-        >
-          <i class="fas fa-fw fa-download"></i>
-          <span v-if="fileName"> {{ fileName }}.JSON</span>
-          <span v-else>DOWNLOAD JSON</span>
-        </button>
-      </div>
+    <div class="md:grid grid-rows-[80px] grid-cols-2 gap-4 mb-5">
+      <button
+        @click="$emit('modeChange')"
+        class="text-stone-600 text-center text-xl flex items-center justify-center"
+      >
+        <code class="my-code">csv</code>
+        <i class="mx-2 fa-solid fa-arrow-right fa-fw" />
+        <code>
+          <i class="fa-solid fa-file-code"></i>
+          json
+        </code>
+      </button>
+
       <label class="rounded-lg bg-gray-200 border p-5 block">
         <input @change="handleFile" type="file" accept=".csv" />
       </label>
+
+      <button
+        @click="handleDownloadJSON"
+        :disabled="Object.keys(csvResult).length === 0"
+        type="submit"
+        class="my-btn w-full"
+      >
+        <i class="fas fa-fw fa-download"></i>
+        <span v-if="fileName"> {{ fileName }}.JSON</span>
+        <span v-else>DOWNLOAD JSON</span>
+      </button>
     </div>
 
     <div class="border bg-white rounded-lg">
@@ -83,6 +83,7 @@ export default defineComponent({
 
     /** JSON 下載 */
     const handleDownloadJSON = () => {
+      /** set formatted json string */
       const text = JSON.stringify(jsonResult.value, null, 2);
 
       if (text) {
